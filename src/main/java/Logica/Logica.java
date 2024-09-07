@@ -3,10 +3,7 @@ package Logica;
 import Jugador.Jugador;
 import Disparo.Disparo;
 import Aliens.Aliens;
-import java.awt.Canvas;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.Timer;
@@ -16,18 +13,17 @@ public class Logica extends Canvas {
     private final Jugador jugador;
     private boolean izquierdaPresionada = false;
     private boolean derechaPresionada = false;
-    private final Disparo[] disparos = new Disparo[10];
+    private final Disparo[] disparos;
     private int numDisparos = 0;
-    private final Aliens[] enemigos = new Aliens[5]; // Arreglo para enemigos
-    private int numEnemigos = 0;
+    private final Aliens[] enemigos;
 
     public Logica() {
         jugador = new Jugador(400, 550);
+        disparos = new Disparo[10];
+        enemigos = new Aliens[5];
 
-        // Inicializar enemigos
         for (int i = 0; i < enemigos.length; i++) {
-            enemigos[i] = new Aliens(100 + i * 60, 50); 
-            numEnemigos++;
+            enemigos[i] = new Aliens(100 + i * 60, 50);
         }
 
         setBackground(Color.BLACK);
@@ -67,47 +63,47 @@ public class Logica extends Canvas {
             jugador.moverDerecha();
         }
 
-        // Mover enemigos
-        for (int i = 0; i < numEnemigos; i++) {
-            Aliens enemigo = enemigos[i];
-            if (enemigo != null) {
-                enemigo.mover();
-            }
+        for (Aliens enemigo : enemigos) {
+            enemigo.mover();
         }
 
-        // Actualizar disparos
         for (int i = 0; i < numDisparos; i++) {
             Disparo disparo = disparos[i];
             if (disparo != null) {
                 disparo.mover();
                 if (!disparo.estaActivo()) {
-                    disparos[i] = disparos[numDisparos - 1];
-                    disparos[numDisparos - 1] = null;
-                    numDisparos--;
+                    eliminarDisparo(i);
                 }
             }
         }
 
-        // Detectar colisiones
+        detectarColisiones();
+        repaint();
+    }
+
+    private void eliminarDisparo(int index) {
+        for (int i = index; i < numDisparos - 1; i++) {
+            disparos[i] = disparos[i + 1];
+        }
+        disparos[numDisparos - 1] = null;
+        numDisparos--;
+    }
+
+    private void detectarColisiones() {
         for (int i = 0; i < numDisparos; i++) {
             Disparo disparo = disparos[i];
-            if (disparo != null) {
-                Rectangle boundsDisparo = disparo.getBounds();
-                for (int j = 0; j < numEnemigos; j++) {
-                    Aliens enemigo = enemigos[j];
-                    if (enemigo != null && enemigo.estaActivo()) {
-                        Rectangle boundsEnemigo = enemigo.getBounds();
-                        if (boundsDisparo.intersects(boundsEnemigo)) {
-                            enemigo.setActivo(false);
-                            disparo.setActivo(false);
-                            break;
-                        }
+            Rectangle boundsDisparo = disparo.getBounds();
+            for (Aliens enemigo : enemigos) {
+                if (enemigo != null && enemigo.estaActivo()) {
+                    Rectangle boundsEnemigo = enemigo.getBounds();
+                    if (boundsDisparo.intersects(boundsEnemigo)) {
+                        enemigo.setActivo(false);
+                        disparo.setActivo(false);
+                        break;
                     }
                 }
             }
         }
-
-        repaint();
     }
 
     private void disparar() {
@@ -128,8 +124,7 @@ public class Logica extends Canvas {
                 disparo.dibujar(g);
             }
         }
-        for (int i = 0; i < numEnemigos; i++) {
-            Aliens enemigo = enemigos[i];
+        for (Aliens enemigo : enemigos) {
             if (enemigo != null) {
                 enemigo.dibujar(g);
             }
