@@ -112,13 +112,24 @@ public class Menu extends JFrame {
     }
 
     private void iniciarJuego(String nombreJugador) {
-        JFrame ventanaJuego = new JFrame("Space Invaders - " + nombreJugador);
+               JFrame ventana = new JFrame("Space Invaders");
         Logica logica = new Logica();
 
-        ventanaJuego.setSize(800, 600);
-        ventanaJuego.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        ventanaJuego.add(logica);
-        ventanaJuego.setVisible(true);
+        JButton botonPausa = new JButton("Pausa");
+        botonPausa.setSize(100, 30);
+
+        ventana.setSize(800, 600);
+        ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        ventana.setLayout(null); 
+
+        botonPausa.setBounds(700, 10, 80, 30);
+
+        botonPausa.addActionListener(e -> logica.pausarJuego());
+
+        ventana.add(botonPausa);
+        ventana.add(logica);
+
+        ventana.setVisible(true);
 
         logica.requestFocusInWindow();
         this.dispose();

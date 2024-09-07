@@ -2,8 +2,8 @@ package Aliens;
 
 import java.awt.Graphics;
 import java.awt.Image;
-import Recursos.Recursos;
 import java.awt.Rectangle;
+import Recursos.Recursos;
 
 public class Aliens {
     private int x;
@@ -13,6 +13,7 @@ public class Aliens {
     private final int ancho = 40;
     private final int alto = 30;
     private final Image imagen;
+    private boolean activo;
 
     public Aliens(int inicioX, int inicioY) {
         this.x = inicioX;
@@ -30,27 +31,26 @@ public class Aliens {
     }
 
     public void dibujar(Graphics g) {
-        if (imagen != null) {
+        if (activo) {
             g.drawImage(imagen, x, y, ancho, alto, null);
         }
     }
 
-        public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
     public Rectangle getBounds() {
         return new Rectangle(x, y, ancho, alto);
     }
 
     public boolean estaActivo() {
-        return imagen != null;
+        return activo;
     }
 
     public void setActivo(boolean activo) {
-        // Si la imagen no es null, se considera activo
+        this.activo = activo;
+    }
+    public int  getX(){
+        return x;
+    }
+    public int  getY(){
+        return y;
     }
 }

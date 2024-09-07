@@ -95,6 +95,7 @@ public class Logica extends Canvas {
         detectarColisiones();
         repaint();
     }
+    }
 
     private void eliminarDisparo(int index) {
         for (int i = index; i < numDisparos - 1; i++) {
