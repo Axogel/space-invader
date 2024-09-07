@@ -1,6 +1,1 @@
-Jugador X: 390
-Enemigo 0 X: 326 Y: 50
-Enemigo 1 X: 386 Y: 50
-Enemigo 2 X: 446 Y: 50
-Enemigo 3 X: 506 Y: 50
-Enemigo 4 X: 566 Y: 50
+Jugador X: 400

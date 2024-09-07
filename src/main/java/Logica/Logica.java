@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
+import java.awt.image.BufferStrategy;
 
 public class Logica extends Canvas {
 
@@ -32,15 +33,15 @@ public class Logica extends Canvas {
         disparos = new Disparo[10];
         enemigos = new Aliens[5];
         bloques = new Bloques[3]; // Inicializa el array de bloques
+        numEnemigos = enemigos.length; // Asegúrate de inicializar numEnemigos
 
         // Inicializar enemigos
         for (int i = 0; i < enemigos.length; i++) {
             enemigos[i] = new Aliens(100 + i * 60, 50);
         }
-
         // Inicializar bloques
         for (int i = 0; i < bloques.length; i++) {
-            bloques[i] = new Bloques(270 + i * 100, 500);
+        bloques[i] = new Bloques(270 + i * 100, 500);
         }
 
         puntuacion = 0; // Inicializar la puntuación
@@ -82,6 +83,67 @@ public class Logica extends Canvas {
         timer.start();
     }
 
+    @Override
+    public void paint(Graphics g) {
+        // Este método se llama automáticamente, lo dejamos vacío para evitar flickering
+    }
+
+    @Override
+    public void update(Graphics g) {
+        // Este método también se llama automáticamente al redibujar, lo dejamos vacío para evitar flickering
+    }
+    private void eliminarEnemigo(int index) {
+        for (int i = index; i < numEnemigos - 1; i++) {
+            enemigos[i] = enemigos[i + 1];
+        }
+        enemigos[numEnemigos - 1] = null; // Eliminar el último enemigo
+        numEnemigos--; // Reducir el número de enemigos
+    }
+
+    public void renderizar() {
+        BufferStrategy buffer = getBufferStrategy();
+        if (buffer == null) {
+            createBufferStrategy(3); // Crear triple buffer para mayor rendimiento
+            return;
+        }
+
+        Graphics g = buffer.getDrawGraphics();
+
+        // Dibuja el fondo
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, getWidth(), getHeight());
+
+        // Dibuja los elementos del juego
+        jugador.dibujar(g);
+        for (int i = 0; i < numDisparos; i++) {
+            Disparo disparo = disparos[i];
+            if (disparo != null) {
+                disparo.dibujar(g);
+            }
+        }
+        for (Aliens enemigo : enemigos) {
+            if (enemigo != null) {
+                enemigo.dibujar(g);
+            }
+        }
+        for (Bloques bloque : bloques) {
+            if (bloque != null) {
+                bloque.dibujar(g);
+            }
+        }
+
+        // Mostrar la puntuación
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.drawString("Puntuación: " + puntuacion, 10, 20);
+
+        // Libera recursos del gráfico
+        g.dispose();
+
+        // Muestra el buffer en pantalla
+        buffer.show();
+    }
+
     private void actualizar() {
         if (!juegoEnPausa) {
             if (izquierdaPresionada && jugador.getX() > 0) {
@@ -108,7 +170,7 @@ public class Logica extends Canvas {
             }
 
             detectarColisiones();
-            repaint();
+            renderizar(); // Llamar a renderizar en lugar de repaint para usar el buffer
         }
     }
 
@@ -119,38 +181,39 @@ public class Logica extends Canvas {
         disparos[numDisparos - 1] = null;
         numDisparos--;
     }
+private void detectarColisiones() {
+    for (int i = 0; i < numDisparos; i++) {
+        Disparo disparo = disparos[i];
+        Rectangle boundsDisparo = disparo.getBounds();
 
-    private void detectarColisiones() {
-        for (int i = 0; i < numDisparos; i++) {
-            Disparo disparo = disparos[i];
-            Rectangle boundsDisparo = disparo.getBounds();
-
-            // Colisiones con enemigos
-            for (int j = 0; j < numEnemigos; j++) {
-                Aliens enemigo = enemigos[j];
-                if (enemigo != null && enemigo.estaActivo()) {
-                    Rectangle boundsEnemigo = enemigo.getBounds();
-                    if (boundsDisparo.intersects(boundsEnemigo)) {
-                        enemigo.setActivo(false);
-                        disparo.setActivo(false);
-                        puntuacion += 100; // Incrementar la puntuación por destruir un enemigo
-                        break;
-                    }
-                }
-            }
-
-            // Colisiones con bloques
-            for (int k = 0; k < bloques.length; k++) {
-                Bloques bloque = bloques[k];
-                if (bloque != null && bloque.estaActivo() && boundsDisparo.intersects(bloque.getBounds())) {
-                    bloque.destruir();
-                    disparo.setActivo(false);
-                    puntuacion += 50; // Incrementar la puntuación por destruir un bloque
-                    break;
+        // Colisiones con enemigos
+        for (int j = 0; j < numEnemigos; j++) {
+            Aliens enemigo = enemigos[j];
+            if (enemigo != null && enemigo.estaActivo()) {
+                Rectangle boundsEnemigo = enemigo.getBounds();
+                if (boundsDisparo.intersects(boundsEnemigo)) {
+                    enemigo.setActivo(false); // Desactivar el enemigo
+                    disparo.setActivo(false); // Desactivar el disparo
+                    puntuacion += 100; // Incrementar la puntuación por destruir un enemigo
+                    eliminarEnemigo(j); // Eliminar enemigo del array
+                    break; // Termina la verificación de colisión para este disparo
                 }
             }
         }
+
+        // Colisiones con bloques
+        for (int k = 0; k < bloques.length; k++) {
+            Bloques bloque = bloques[k];
+            if (bloque != null && bloque.estaActivo() && boundsDisparo.intersects(bloque.getBounds())) {
+                bloque.destruir(); // Desactivar el bloque
+                disparo.setActivo(false); // Desactivar el disparo
+                puntuacion += 50; // Incrementar la puntuación por destruir un bloque
+                break;
+            }
+        }
     }
+}
+
 
     private void disparar() {
         if (numDisparos < disparos.length) {
@@ -197,32 +260,5 @@ public class Logica extends Canvas {
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Error al guardar la partida");
         }
-    }
-
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-        jugador.dibujar(g);
-        for (int i = 0; i < numDisparos; i++) {
-            Disparo disparo = disparos[i];
-            if (disparo != null) {
-                disparo.dibujar(g);
-            }
-        }
-        for (Aliens enemigo : enemigos) {
-            if (enemigo != null) {
-                enemigo.dibujar(g);
-            }
-        }
-        for (Bloques bloque : bloques) {
-            if (bloque != null) {
-                bloque.dibujar(g);
-            }
-        }
-
-        // Mostrar la puntuación
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 20));
-        g.drawString("Puntuación: " + puntuacion, 10, 20);
     }
 }
