@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
+import java.awt.image.BufferStrategy;
 
 public class Logica extends Canvas {
 
@@ -69,6 +70,51 @@ public class Logica extends Canvas {
         timer.start();
     }
 
+  @Override
+    public void paint(Graphics g) {
+        // Este método se llama automáticamente, lo dejamos vacío para evitar flickering
+    }
+
+    @Override
+    public void update(Graphics g) {
+        // Este método también se llama automáticamente al redibujar, lo dejamos vacío para evitar flickering
+    }
+
+    public void renderizar() {
+        BufferStrategy buffer = getBufferStrategy();
+        if (buffer == null) {
+            createBufferStrategy(3); // Crear triple buffer para mayor rendimiento
+            return;
+        }
+
+        Graphics g = buffer.getDrawGraphics();
+        super.paint(g);  // Si necesitas llamar al método paint
+
+        // Dibuja el fondo
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, getWidth(), getHeight());
+
+        // Dibuja los elementos del juego
+        jugador.dibujar(g);
+        for (int i = 0; i < numDisparos; i++) {
+            Disparo disparo = disparos[i];
+            if (disparo != null) {
+                disparo.dibujar(g);
+            }
+        }
+        for (Aliens enemigo : enemigos) {
+            if (enemigo != null) {
+                enemigo.dibujar(g);
+            }
+        }
+
+        // Libera recursos del gráfico
+        g.dispose();
+
+        // Muestra el buffer en pantalla
+        buffer.show();
+    }
+
     private void actualizar() {
         if (!juegoEnPausa) {
             if (izquierdaPresionada && jugador.getX() > 0) {
@@ -78,25 +124,24 @@ public class Logica extends Canvas {
                 jugador.moverDerecha();
             }
 
-        for (Aliens enemigo : enemigos) {
-            enemigo.mover();
-        }
+            for (Aliens enemigo : enemigos) {
+                enemigo.mover();
+            }
 
-        for (int i = 0; i < numDisparos; i++) {
-            Disparo disparo = disparos[i];
-            if (disparo != null) {
-                disparo.mover();
-                if (!disparo.estaActivo()) {
-                    eliminarDisparo(i);
+            for (int i = 0; i < numDisparos; i++) {
+                Disparo disparo = disparos[i];
+                if (disparo != null) {
+                    disparo.mover();
+                    if (!disparo.estaActivo()) {
+                        eliminarDisparo(i);
+                    }
                 }
             }
+
+            detectarColisiones();
+            renderizar(); // Llamamos a renderizar en lugar de repaint
         }
-
-        detectarColisiones();
-        repaint();
     }
-    }
-
     private void eliminarDisparo(int index) {
         for (int i = index; i < numDisparos - 1; i++) {
             disparos[i] = disparos[i + 1];
@@ -170,20 +215,20 @@ public void pausarJuego() {
         }
     }
 
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-        jugador.dibujar(g);
-        for (int i = 0; i < numDisparos; i++) {
-            Disparo disparo = disparos[i];
-            if (disparo != null) {
-                disparo.dibujar(g);
-            }
-        }
-        for (Aliens enemigo : enemigos) {
-            if (enemigo != null) {
-                enemigo.dibujar(g);
-            }
-        }
-    }
+    // @Override
+    // public void paint(Graphics g) {
+    //     super.paint(g);
+    //     jugador.dibujar(g);
+    //     for (int i = 0; i < numDisparos; i++) {
+    //         Disparo disparo = disparos[i];
+    //         if (disparo != null) {
+    //             disparo.dibujar(g);
+    //         }
+    //     }
+    //     for (Aliens enemigo : enemigos) {
+    //         if (enemigo != null) {
+    //             enemigo.dibujar(g);
+    //         }
+    //     }
+    // }
 }
