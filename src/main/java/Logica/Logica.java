@@ -22,29 +22,27 @@ public class Logica extends Canvas {
     private int numDisparos = 0;
     private final Aliens[] enemigos;
     private int numEnemigos;
-    private final Bloques[] bloques; // Lista de bloques
-    private int numBloques; // Número de bloques
+    private final Bloques[] bloques; 
+    private int numBloques; 
     private boolean juegoEnPausa = false;
     private Timer timer;
-    private int puntuacion; // Variable para la puntuación
+    private int puntuacion;
 
     public Logica() {
         jugador = new Jugador(400, 550);
         disparos = new Disparo[10];
         enemigos = new Aliens[5];
-        bloques = new Bloques[3]; // Inicializa el array de bloques
-        numEnemigos = enemigos.length; // Asegúrate de inicializar numEnemigos
+        bloques = new Bloques[3];
+        numEnemigos = enemigos.length; 
 
-        // Inicializar enemigos
         for (int i = 0; i < enemigos.length; i++) {
             enemigos[i] = new Aliens(100 + i * 60, 50);
         }
-        // Inicializar bloques
         for (int i = 0; i < bloques.length; i++) {
         bloques[i] = new Bloques(270 + i * 100, 500);
         }
 
-        puntuacion = 0; // Inicializar la puntuación
+        puntuacion = 0;
 
         setBackground(Color.BLACK);
         setSize(800, 600);
@@ -84,36 +82,30 @@ public class Logica extends Canvas {
     }
 
     @Override
-    public void paint(Graphics g) {
-        // Este método se llama automáticamente, lo dejamos vacío para evitar flickering
-    }
+    public void paint(Graphics g) {}
 
     @Override
-    public void update(Graphics g) {
-        // Este método también se llama automáticamente al redibujar, lo dejamos vacío para evitar flickering
-    }
+    public void update(Graphics g) {}
     private void eliminarEnemigo(int index) {
         for (int i = index; i < numEnemigos - 1; i++) {
             enemigos[i] = enemigos[i + 1];
         }
-        enemigos[numEnemigos - 1] = null; // Eliminar el último enemigo
-        numEnemigos--; // Reducir el número de enemigos
+        enemigos[numEnemigos - 1] = null;
+        numEnemigos--;
     }
 
     public void renderizar() {
         BufferStrategy buffer = getBufferStrategy();
         if (buffer == null) {
-            createBufferStrategy(3); // Crear triple buffer para mayor rendimiento
+            createBufferStrategy(3); 
             return;
         }
 
         Graphics g = buffer.getDrawGraphics();
 
-        // Dibuja el fondo
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        // Dibuja los elementos del juego
         jugador.dibujar(g);
         for (int i = 0; i < numDisparos; i++) {
             Disparo disparo = disparos[i];
@@ -132,15 +124,12 @@ public class Logica extends Canvas {
             }
         }
 
-        // Mostrar la puntuación
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 20));
         g.drawString("Puntuación: " + puntuacion, 10, 20);
 
-        // Libera recursos del gráfico
         g.dispose();
 
-        // Muestra el buffer en pantalla
         buffer.show();
     }
 
@@ -170,7 +159,7 @@ public class Logica extends Canvas {
             }
 
             detectarColisiones();
-            renderizar(); // Llamar a renderizar en lugar de repaint para usar el buffer
+            renderizar(); 
         }
     }
 
@@ -186,28 +175,26 @@ private void detectarColisiones() {
         Disparo disparo = disparos[i];
         Rectangle boundsDisparo = disparo.getBounds();
 
-        // Colisiones con enemigos
         for (int j = 0; j < numEnemigos; j++) {
             Aliens enemigo = enemigos[j];
             if (enemigo != null && enemigo.estaActivo()) {
                 Rectangle boundsEnemigo = enemigo.getBounds();
                 if (boundsDisparo.intersects(boundsEnemigo)) {
-                    enemigo.setActivo(false); // Desactivar el enemigo
-                    disparo.setActivo(false); // Desactivar el disparo
-                    puntuacion += 100; // Incrementar la puntuación por destruir un enemigo
-                    eliminarEnemigo(j); // Eliminar enemigo del array
-                    break; // Termina la verificación de colisión para este disparo
+                    enemigo.setActivo(false); 
+                    disparo.setActivo(false); 
+                    puntuacion += 100;
+                    eliminarEnemigo(j); 
+                    break;
                 }
             }
         }
 
-        // Colisiones con bloques
         for (int k = 0; k < bloques.length; k++) {
             Bloques bloque = bloques[k];
             if (bloque != null && bloque.estaActivo() && boundsDisparo.intersects(bloque.getBounds())) {
-                bloque.destruir(); // Desactivar el bloque
-                disparo.setActivo(false); // Desactivar el disparo
-                puntuacion += 50; // Incrementar la puntuación por destruir un bloque
+                bloque.destruir(); 
+                disparo.setActivo(false); 
+                puntuacion += 50; 
                 break;
             }
         }
@@ -228,14 +215,14 @@ private void detectarColisiones() {
         if (juegoEnPausa) {
             timer.stop();
             int opcion = mostrarMenuPausa();
-            if (opcion == 0) { // Reanudar
+            if (opcion == 0) { 
                 juegoEnPausa = false;
                 timer.start();
-            } else if (opcion == 1) { // Guardar Partida
+            } else if (opcion == 1) {
                 guardarPartida();
                 juegoEnPausa = false;
                 timer.start();
-            } else if (opcion == 2) { // Salir
+            } else if (opcion == 2) { 
                 System.exit(0);
             }
         }
