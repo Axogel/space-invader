@@ -1,6 +1,9 @@
 package Disparo;
 
+import javax.sound.sampled.*;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import javax.swing.ImageIcon;
 
 public class Disparo {
@@ -18,6 +21,8 @@ public class Disparo {
         this.activo = true;
 
         this.imagen = new ImageIcon("src/main/java/Imagenes/bullet.png").getImage();
+        reproducirSonido("src/main/java/sounds/shot.wav");
+
     }
 
     public void dibujar(Graphics g) {
@@ -43,5 +48,16 @@ public class Disparo {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
-    }    
+    }   
+    public void reproducirSonido(String rutaArchivo) {
+        try {
+            File archivoSonido = new File(rutaArchivo);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(archivoSonido);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioStream);
+            clip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    } 
 }

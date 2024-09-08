@@ -5,6 +5,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import Logica.Logica;
+import javax.sound.sampled.*;
+import java.io.File;
+import java.io.IOException; 
 
 public class Menu extends JFrame {
 
@@ -110,10 +113,25 @@ public class Menu extends JFrame {
             }
         });
     }
+        public static void reproducirMusica(String rutaArchivo) {
+        try {
+            File archivoMusica = new File(rutaArchivo);
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(archivoMusica);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioStream);
+            clip.loop(Clip.LOOP_CONTINUOUSLY); // Repetir en bucle
+            clip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void iniciarJuego(String nombreJugador) {
                JFrame ventana = new JFrame("Space Invaders");
         Logica logica = new Logica();
+        reproducirMusica("src/main/java/sounds/soundtrack.wav");
+
 
         JButton botonPausa = new JButton("Pausa");
         botonPausa.setSize(100, 30);
