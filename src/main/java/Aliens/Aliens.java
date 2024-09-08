@@ -18,7 +18,7 @@ public class Aliens {
     public Aliens(int inicioX, int inicioY) {
         this.x = inicioX;
         this.y = inicioY;
-        this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/calamar.png");
+        this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/nivel1.png");
         this.activo = true;
     }
 
