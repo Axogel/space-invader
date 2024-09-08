@@ -10,16 +10,40 @@ public class Aliens {
     private int y;
     private int dx = 2; // Movimiento horizontal
     private int dy = 10; // Movimiento vertical
+    public int puntos;
     private final int ancho = 40;
     private final int alto = 30;
     private final Image imagen;
     private boolean activo;
 
-    public Aliens(int inicioX, int inicioY) {
+    public Aliens(int inicioX, int inicioY, int tipo) {
         this.x = inicioX;
         this.y = inicioY;
-        this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/nivel1.png");
         this.activo = true;
+
+        switch (tipo) {
+            case 1:
+                this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/calamar.png");
+                this.puntos = 30;  // Puntos para el alien tipo 1
+                break;
+            case 2:
+                this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/cangrejo.png");
+                this.puntos = 20;  // Puntos para el alien tipo 2
+                break;
+            case 3:
+                this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/pulpo.png");
+                this.puntos = 10;  // Puntos para el alien tipo 3
+                break;
+            case 4: 
+                //nave 
+                this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/pulpo.png");
+                this.puntos = (int)(Math.random());  // Puntos para el alien tipo 3
+                break;
+            default:
+                this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/default.png");
+                this.puntos = 50;   // Puntos por defecto si no coincide ningún tipo
+                break;
+        }
     }
 
     public void mover() {

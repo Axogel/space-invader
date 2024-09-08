@@ -129,7 +129,6 @@ public class Logica extends Canvas {
             Disparo disparo = disparos[i];
             Rectangle boundsDisparo = disparo.getBounds();
 
-            // Verificar colisiones con enemigos
             for (int j = 0; j < numEnemigos; j++) {
                 Aliens enemigo = enemigos[j];
                 if (enemigo != null && enemigo.estaActivo()) {
@@ -137,20 +136,18 @@ public class Logica extends Canvas {
                     if (boundsDisparo.intersects(boundsEnemigo)) {
                         enemigo.setActivo(false);
                         disparo.setActivo(false);
-                        puntuacion += 100; // Suma de puntos por impactar al enemigo
+                        puntuacion += enemigo.puntos; 
                         eliminarEnemigo(j);
                         break;
                     }
                 }
             }
 
-            // Verificar colisiones con bloques
             for (int k = 0; k < numBloques; k++) {
                 Bloques bloque = bloques[k];
                 if (bloque != null && bloque.estaActivo() && boundsDisparo.intersects(bloque.getBounds())) {
-                    bloque.destruir(); // Actualiza la imagen del bloque
+                    bloque.destruir(); 
                     disparo.setActivo(false);
-                    // No se suman puntos al impactar el bloque
                     break;
                 }
             }
