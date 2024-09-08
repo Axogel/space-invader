@@ -1,10 +1,10 @@
 package Logica;
 
 import Jugador.Jugador;
-import Menu.Menu;
 import Disparo.Disparo;
 import Aliens.Aliens;
 import Bloques.Bloques;
+import Nivel.Nivel;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -13,9 +13,6 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import java.awt.image.BufferStrategy;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import javax.sound.sampled.Clip;
 
 public class Logica extends Canvas {
 
@@ -24,29 +21,25 @@ public class Logica extends Canvas {
     private boolean derechaPresionada = false;
     private final Disparo[] disparos;
     private int numDisparos = 0;
-    private final Aliens[] enemigos;
+    private Aliens[] enemigos;
     private int numEnemigos;
-    private final Bloques[] bloques; 
-    private int numBloques; 
+    private Bloques[] bloques;
+    private int numBloques;
     private boolean juegoEnPausa = false;
     private Timer timer;
     private int puntuacion;
-    private Clip clipMusica;
+    private Nivel nivelActual;
+    private int nivel;
 
     public Logica() {
         jugador = new Jugador(400, 550);
         disparos = new Disparo[10];
-        enemigos = new Aliens[5];
-        bloques = new Bloques[6];
-        numEnemigos = enemigos.length; 
-
-        for (int i = 0; i < enemigos.length; i++) {
-            enemigos[i] = new Aliens(100 + i * 60, 50);
-        }
-        for (int i = 0; i < bloques.length; i++) {
-            bloques[i] = new Bloques(130 + i * 100, 500);
-        }
-
+        enemigos = new Aliens[0]; // Inicialmente vacío
+        bloques = new Bloques[0]; // Inicialmente vacío
+        numEnemigos = 0;
+        numBloques = 0;
+        nivel = 1; // Empezamos en el primer nivel
+        cargarNivel(nivel);
         puntuacion = 0;
 
         setBackground(Color.BLACK);
@@ -86,11 +79,26 @@ public class Logica extends Canvas {
         timer.start();
     }
 
-    @Override
-    public void paint(Graphics g) {}
+    private void cargarNivel(int nivel) {
+        nivelActual = new Nivel(nivel);
+        enemigos = nivelActual.getEnemigos();
+        bloques = nivelActual.getBloques();
+        numEnemigos = nivelActual.getNumEnemigos();
+        numBloques = bloques.length;
+    }
 
-    @Override
-    public void update(Graphics g) {}
+    private void verificarNivel() {
+        if (numEnemigos <= 0) {
+            nivel++;
+            if (nivel > 3) { // Número total de niveles
+                // Mostrar mensaje de victoria y terminar el juego
+                JOptionPane.showMessageDialog(this, "¡Has ganado el juego!");
+                System.exit(0);
+            } else {
+                cargarNivel(nivel); // Cargar el siguiente nivel
+            }
+        }
+    }
 
     private void eliminarEnemigo(int index) {
         for (int i = index; i < numEnemigos - 1; i++) {
@@ -117,40 +125,43 @@ public class Logica extends Canvas {
     }
 
     private void detectarColisiones() {
-    for (int i = 0; i < numDisparos; i++) {
-        Disparo disparo = disparos[i];
-        Rectangle boundsDisparo = disparo.getBounds();
+        for (int i = 0; i < numDisparos; i++) {
+            Disparo disparo = disparos[i];
+            Rectangle boundsDisparo = disparo.getBounds();
 
-        // Verificar colisiones con enemigos
-        for (int j = 0; j < numEnemigos; j++) {
-            Aliens enemigo = enemigos[j];
-            if (enemigo != null && enemigo.estaActivo()) {
-                Rectangle boundsEnemigo = enemigo.getBounds();
-                if (boundsDisparo.intersects(boundsEnemigo)) {
-                    enemigo.setActivo(false);
+            // Verificar colisiones con enemigos
+            for (int j = 0; j < numEnemigos; j++) {
+                Aliens enemigo = enemigos[j];
+                if (enemigo != null && enemigo.estaActivo()) {
+                    Rectangle boundsEnemigo = enemigo.getBounds();
+                    if (boundsDisparo.intersects(boundsEnemigo)) {
+                        enemigo.setActivo(false);
+                        disparo.setActivo(false);
+                        puntuacion += 100; // Suma de puntos por impactar al enemigo
+                        eliminarEnemigo(j);
+                        break;
+                    }
+                }
+            }
+
+            // Verificar colisiones con bloques
+            for (int k = 0; k < numBloques; k++) {
+                Bloques bloque = bloques[k];
+                if (bloque != null && bloque.estaActivo() && boundsDisparo.intersects(bloque.getBounds())) {
+                    bloque.destruir(); // Actualiza la imagen del bloque
                     disparo.setActivo(false);
-                    puntuacion += 100; // Suma de puntos por impactar al enemigo
-                    eliminarEnemigo(j);
+                    // No se suman puntos al impactar el bloque
                     break;
                 }
             }
+
+            // Verificar colisiones entre el jugador y los enemigos
+            verificarColisionesConEnemigos();
         }
 
-        // Verificar colisiones con bloques
-        for (int k = 0; k < bloques.length; k++) {
-            Bloques bloque = bloques[k];
-            if (bloque != null && bloque.estaActivo() && boundsDisparo.intersects(bloque.getBounds())) {
-                bloque.destruir(); // Actualiza la imagen del bloque
-                disparo.setActivo(false);
-                // No se suman puntos al impactar el bloque
-                break;
-            }
-        }
-
-        // Verificar colisiones entre el jugador y los enemigos
-        verificarColisionesConEnemigos();
+        // Verificar si se ha pasado de nivel
+        verificarNivel();
     }
-}
 
     private void disparar() {
         if (numDisparos < disparos.length) {
@@ -159,15 +170,6 @@ public class Logica extends Canvas {
             numDisparos++;
         }
     }
-    public void setClipMusica(Clip clip) {
-        this.clipMusica = clip;
-    }
-    private void cerrarJuego() {
-    if (clipMusica != null && clipMusica.isRunning()) {
-        clipMusica.stop();
-        clipMusica.close();
-    }
-}
 
     public void pausarJuego() {
         juegoEnPausa = !juegoEnPausa;
@@ -182,10 +184,7 @@ public class Logica extends Canvas {
                 juegoEnPausa = false;
                 timer.start();
             } else if (opcion == 2) { 
-                cerrarJuego();
-                JFrame ventana = (JFrame) SwingUtilities.getWindowAncestor(this);
-                ventana.dispose(); 
-                new Menu();        
+                System.exit(0);
             }
         }
     }
@@ -202,7 +201,7 @@ public class Logica extends Canvas {
             for (int i = 0; i < enemigos.length; i++) {
                 Aliens enemigo = enemigos[i];
                 if (enemigo != null) {
-                    writer.write("Enemigo " + i + " X: " + enemigo.getX() + " Y: " + enemigo.getY() + "\n");
+                    writer.write("Enemigo " + i + " X: " + enemigo.getBounds().x + " Y: " + enemigo.getBounds().y + "\n");
                 }
             }
             writer.write("Puntuación: " + puntuacion + "\n");
@@ -264,31 +263,27 @@ public class Logica extends Canvas {
         g.fillRect(0, 0, getWidth(), getHeight());
 
         jugador.dibujar(g);
-        for (int i = 0; i < numDisparos; i++) {
-            Disparo disparo = disparos[i];
-            if (disparo != null) {
-                disparo.dibujar(g);
-            }
-        }
         for (Aliens enemigo : enemigos) {
-            if (enemigo != null) {
+            if (enemigo != null && enemigo.estaActivo()) {
                 enemigo.dibujar(g);
             }
         }
+        for (int i = 0; i < numDisparos; i++) {
+            if (disparos[i] != null) {
+                disparos[i].dibujar(g);
+            }
+        }
         for (Bloques bloque : bloques) {
-            if (bloque != null) {
+            if (bloque != null && bloque.estaActivo()) {
                 bloque.dibujar(g);
             }
         }
 
-        jugador.dibujarVidas(g, 30, 570); // Ajusta la posición según lo necesites
-
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 20));
-        g.drawString("Puntuación: " + puntuacion, 10, 40);
+        g.drawString("Puntuación: " + puntuacion, 10, 20);
+        g.drawString("Vidas: " + jugador.getVidas(), getWidth() - 100, 20);
 
         g.dispose();
-
         buffer.show();
     }
 }

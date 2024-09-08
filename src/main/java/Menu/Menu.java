@@ -8,10 +8,8 @@ import Logica.Logica;
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException; 
-import javax.sound.sampled.Clip;
 
 public class Menu extends JFrame {
-private Clip clipMusica;
 
     public Menu() {
         setTitle("Menú Principal");
@@ -115,29 +113,24 @@ private Clip clipMusica;
             }
         });
     }
-
-    public static Clip reproducirMusica(String rutaArchivo) {
-        Clip clip = null;
+        public static void reproducirMusica(String rutaArchivo) {
         try {
             File archivoMusica = new File(rutaArchivo);
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(archivoMusica);
-            clip = AudioSystem.getClip();
+            Clip clip = AudioSystem.getClip();
             clip.open(audioStream);
             clip.loop(Clip.LOOP_CONTINUOUSLY); // Repetir en bucle
             clip.start();
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
         }
-        return clip;
     }
 
 
-
     private void iniciarJuego(String nombreJugador) {
-        JFrame ventana = new JFrame("Space Invaders");
+               JFrame ventana = new JFrame("Space Invaders");
         Logica logica = new Logica();
-        Clip clipMusica = reproducirMusica("src/main/java/sounds/soundtrack.wav");
-        logica.setClipMusica(clipMusica);
+        reproducirMusica("src/main/java/sounds/soundtrack.wav");
 
 
         JButton botonPausa = new JButton("Pausa");
@@ -164,22 +157,13 @@ private Clip clipMusica;
         JOptionPane.showMessageDialog(this, "Funcionalidad de Cargar Juego aún no implementada.");
     }
 
-private void mostrarInstrucciones() {
-    String instrucciones = "Instrucciones de Space Invaders:\n\n"
-                         + "- Usa las flechas izquierda y derecha para mover tu nave.\n"
-                         + "- Presiona la barra espaciadora para disparar a los enemigos.\n"
-                         + "- Presiona 'P' para pausar el juego.\n"
-                         + "- Tu objetivo es derrotar a todos los enemigos antes de que toquen tus defensas.\n"
-                         + "- ¡Buena suerte!";
-                         
-    JOptionPane.showMessageDialog(this, instrucciones, "Instrucciones", JOptionPane.INFORMATION_MESSAGE);
-}
-
+    private void mostrarInstrucciones() {
+        JOptionPane.showMessageDialog(this, "Instrucciones aún no implementadas.");
+    }
 
     private void mostrarCreditos() {
         JOptionPane.showMessageDialog(this, "Créditos: Desarrolladores del juego.");
     }
-
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
