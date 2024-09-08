@@ -8,8 +8,10 @@ import Logica.Logica;
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException; 
+import javax.sound.sampled.Clip;
 
 public class Menu extends JFrame {
+private Clip clipMusica;
 
     public Menu() {
         setTitle("Menú Principal");
@@ -20,7 +22,6 @@ public class Menu extends JFrame {
         JPanel panelMenu = new JPanel();
         panelMenu.setLayout(new GridLayout(5, 1, 10, 10));
 
-        // Botón Nueva Partida
         JButton botonNuevaPartida = new JButton("Nueva Partida");
         botonNuevaPartida.setFont(new Font("Arial", Font.BOLD, 30));
         botonNuevaPartida.addActionListener(new ActionListener() {
@@ -30,7 +31,6 @@ public class Menu extends JFrame {
             }
         });
 
-        // Botón Cargar Juego
         JButton botonCargarJuego = new JButton("Cargar Juego");
         botonCargarJuego.setFont(new Font("Arial", Font.BOLD, 30));
         botonCargarJuego.addActionListener(new ActionListener() {
@@ -40,7 +40,6 @@ public class Menu extends JFrame {
             }
         });
 
-        // Botón Instrucciones
         JButton botonInstrucciones = new JButton("Instrucciones");
         botonInstrucciones.setFont(new Font("Arial", Font.BOLD, 30));
         botonInstrucciones.addActionListener(new ActionListener() {
@@ -50,7 +49,6 @@ public class Menu extends JFrame {
             }
         });
 
-        // Botón Créditos
         JButton botonCreditos = new JButton("Créditos");
         botonCreditos.setFont(new Font("Arial", Font.BOLD, 30));
         botonCreditos.addActionListener(new ActionListener() {
@@ -60,7 +58,6 @@ public class Menu extends JFrame {
             }
         });
 
-        // Añadir botones al panel
         panelMenu.add(botonNuevaPartida);
         panelMenu.add(botonCargarJuego);
         panelMenu.add(botonInstrucciones);
@@ -77,8 +74,7 @@ public class Menu extends JFrame {
         gbc.insets = new Insets(10, 10, 10, 10);
 
         JLabel etiquetaNombre = new JLabel("Ingrese el nombre del jugador:");
-        // Ajustar el tamaño del campo de texto
-        JTextField campoNombre = new JTextField(20); // Cambia el tamaño del campo aquí
+        JTextField campoNombre = new JTextField(20); 
         JButton botonJugar = new JButton("Jugar");
 
         gbc.gridx = 0;
@@ -113,24 +109,29 @@ public class Menu extends JFrame {
             }
         });
     }
-        public static void reproducirMusica(String rutaArchivo) {
+
+    public static Clip reproducirMusica(String rutaArchivo) {
+        Clip clip = null;
         try {
             File archivoMusica = new File(rutaArchivo);
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(archivoMusica);
-            Clip clip = AudioSystem.getClip();
+            clip = AudioSystem.getClip();
             clip.open(audioStream);
             clip.loop(Clip.LOOP_CONTINUOUSLY); // Repetir en bucle
             clip.start();
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
         }
+        return clip;
     }
 
 
+
     private void iniciarJuego(String nombreJugador) {
-               JFrame ventana = new JFrame("Space Invaders");
+        JFrame ventana = new JFrame("Space Invaders");
         Logica logica = new Logica();
-        reproducirMusica("src/main/java/sounds/soundtrack.wav");
+        Clip clipMusica = reproducirMusica("src/main/java/sounds/soundtrack.wav");
+        logica.setClipMusica(clipMusica);
 
 
         JButton botonPausa = new JButton("Pausa");
@@ -157,13 +158,22 @@ public class Menu extends JFrame {
         JOptionPane.showMessageDialog(this, "Funcionalidad de Cargar Juego aún no implementada.");
     }
 
-    private void mostrarInstrucciones() {
-        JOptionPane.showMessageDialog(this, "Instrucciones aún no implementadas.");
-    }
+private void mostrarInstrucciones() {
+    String instrucciones = "Instrucciones de Space Invaders:\n\n"
+                         + "- Usa las flechas izquierda y derecha para mover tu nave.\n"
+                         + "- Presiona la barra espaciadora para disparar a los enemigos.\n"
+                         + "- Presiona 'P' para pausar el juego.\n"
+                         + "- Tu objetivo es derrotar a todos los enemigos antes de que toquen tus defensas.\n"
+                         + "- ¡Buena suerte!";
+                         
+    JOptionPane.showMessageDialog(this, instrucciones, "Instrucciones", JOptionPane.INFORMATION_MESSAGE);
+}
+
 
     private void mostrarCreditos() {
         JOptionPane.showMessageDialog(this, "Créditos: Desarrolladores del juego.");
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {

@@ -13,6 +13,11 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import java.awt.image.BufferStrategy;
+import Nave.Nave; 
+import Menu.Menu; 
+import javax.sound.sampled.Clip;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 public class Logica extends Canvas {
 
@@ -30,15 +35,21 @@ public class Logica extends Canvas {
     private int puntuacion;
     private Nivel nivelActual;
     private int nivel;
+    private Timer naveTimer;
+    private int numNaves = 0;
+    private Nave[] naves;
+private Clip clipMusica;
 
     public Logica() {
         jugador = new Jugador(400, 550);
         disparos = new Disparo[10];
-        enemigos = new Aliens[0]; // Inicialmente vacío
-        bloques = new Bloques[0]; // Inicialmente vacío
+        enemigos = new Aliens[0]; 
+        bloques = new Bloques[0]; 
+        naves = new Nave[2];
+
         numEnemigos = 0;
         numBloques = 0;
-        nivel = 1; // Empezamos en el primer nivel
+        nivel = 1;
         cargarNivel(nivel);
         puntuacion = 0;
 
@@ -77,8 +88,44 @@ public class Logica extends Canvas {
 
         timer = new Timer(16, e -> actualizar());
         timer.start();
+        naveTimer = new Timer(10000, e -> generarNave());
+        naveTimer.start();
+
+    }
+        public void setClipMusica(Clip clip) {
+        this.clipMusica = clip;
     }
 
+    private void cerrarJuego() {
+        if (clipMusica != null && clipMusica.isRunning()) {
+            clipMusica.stop();
+            clipMusica.close();
+        }
+    }
+private void generarNave() {
+        if (numNaves < naves.length) {
+            Nave nuevaNave = new Nave((int) (Math.random() * (getWidth() - 40)), 50);
+            naves[numNaves] = nuevaNave;
+            numNaves++;
+        }
+    }
+
+    private void moverNaves() {
+        for (int i = 0; i < numNaves; i++) {
+            Nave nave = naves[i];
+            if (nave != null && nave.estaActivo()) {
+                nave.mover(); 
+            }
+        }
+    }
+
+    private void dibujarNaves(Graphics g) {
+        for (Nave nave : naves) {
+            if (nave != null && nave.estaActivo()) {
+                nave.dibujar(g);
+            }
+        }
+    }
     private void cargarNivel(int nivel) {
         nivelActual = new Nivel(nivel);
         enemigos = nivelActual.getEnemigos();
@@ -90,12 +137,11 @@ public class Logica extends Canvas {
     private void verificarNivel() {
         if (numEnemigos <= 0) {
             nivel++;
-            if (nivel > 3) { // Número total de niveles
-                // Mostrar mensaje de victoria y terminar el juego
+            if (nivel > 3) {
                 JOptionPane.showMessageDialog(this, "¡Has ganado el juego!");
                 System.exit(0);
             } else {
-                cargarNivel(nivel); // Cargar el siguiente nivel
+                cargarNivel(nivel); 
             }
         }
     }
@@ -112,53 +158,64 @@ public class Logica extends Canvas {
         for (Aliens enemigo : enemigos) {
             if (enemigo != null && enemigo.estaActivo()) {
                 Rectangle boundsEnemigo = enemigo.getBounds();
-                Rectangle boundsJugador = new Rectangle(jugador.getX(), jugador.getY(), jugador.getAncho(), 20); // Tamaño de la nave
+                Rectangle boundsJugador = new Rectangle(jugador.getX(), jugador.getY(), jugador.getAncho(), 20);
                 
                 if (boundsJugador.intersects(boundsEnemigo)) {
                     jugador.perderVida();
                     enemigo.setActivo(false);
-                    puntuacion -= 50; // Restar puntuación por perder vida, puedes ajustar esto
+                    puntuacion -= 50; 
                     break;
                 }
             }
         }
     }
 
-    private void detectarColisiones() {
-        for (int i = 0; i < numDisparos; i++) {
-            Disparo disparo = disparos[i];
-            Rectangle boundsDisparo = disparo.getBounds();
+private void detectarColisiones() {
+    for (int i = 0; i < numDisparos; i++) {
+        Disparo disparo = disparos[i];
+        Rectangle boundsDisparo = disparo.getBounds();
 
-            for (int j = 0; j < numEnemigos; j++) {
-                Aliens enemigo = enemigos[j];
-                if (enemigo != null && enemigo.estaActivo()) {
-                    Rectangle boundsEnemigo = enemigo.getBounds();
-                    if (boundsDisparo.intersects(boundsEnemigo)) {
-                        enemigo.setActivo(false);
-                        disparo.setActivo(false);
-                        puntuacion += enemigo.puntos; 
-                        eliminarEnemigo(j);
-                        break;
-                    }
-                }
-            }
-
-            for (int k = 0; k < numBloques; k++) {
-                Bloques bloque = bloques[k];
-                if (bloque != null && bloque.estaActivo() && boundsDisparo.intersects(bloque.getBounds())) {
-                    bloque.destruir(); 
+        for (int j = 0; j < numEnemigos; j++) {
+            Aliens enemigo = enemigos[j];
+            if (enemigo != null && enemigo.estaActivo()) {
+                Rectangle boundsEnemigo = enemigo.getBounds();
+                if (boundsDisparo.intersects(boundsEnemigo)) {
+                    enemigo.setActivo(false);
                     disparo.setActivo(false);
+                    puntuacion += enemigo.puntos; 
+                    eliminarEnemigo(j);
                     break;
                 }
             }
-
-            // Verificar colisiones entre el jugador y los enemigos
-            verificarColisionesConEnemigos();
         }
 
-        // Verificar si se ha pasado de nivel
-        verificarNivel();
+        for (int k = 0; k < numBloques; k++) {
+            Bloques bloque = bloques[k];
+            if (bloque != null && bloque.estaActivo() && boundsDisparo.intersects(bloque.getBounds())) {
+                bloque.destruir(); 
+                disparo.setActivo(false);
+                break;
+            }
+        }
+
+        for (int l = 0; l < numNaves; l++) {
+            Nave nave = naves[l];
+            if (nave != null && nave.estaActivo()) {
+                Rectangle boundsNave = nave.getBounds();
+                if (boundsDisparo.intersects(boundsNave)) {
+                    nave.setActivo(false); 
+                    disparo.setActivo(false);
+                    puntuacion += nave.puntos; 
+                    break;
+                }
+            }
+        }
     }
+
+    verificarColisionesConEnemigos();
+
+    verificarNivel();
+}
 
     private void disparar() {
         if (numDisparos < disparos.length) {
@@ -181,7 +238,11 @@ public class Logica extends Canvas {
                 juegoEnPausa = false;
                 timer.start();
             } else if (opcion == 2) { 
-                System.exit(0);
+                                cerrarJuego();
+                JFrame ventana = (JFrame) SwingUtilities.getWindowAncestor(this);
+                ventana.dispose();
+                new Menu(); 
+
             }
         }
     }
@@ -233,7 +294,7 @@ public class Logica extends Canvas {
                     }
                 }
             }
-
+            moverNaves();
             detectarColisiones();
             renderizar(); 
         }
@@ -275,11 +336,14 @@ public class Logica extends Canvas {
                 bloque.dibujar(g);
             }
         }
+        dibujarNaves(g); 
 
-        g.setColor(Color.WHITE);
-        g.drawString("Puntuación: " + puntuacion, 10, 20);
-        g.drawString("Vidas: " + jugador.getVidas(), getWidth() - 100, 20);
-
+    int xInicio = 10; 
+    int yInicio = 520;
+    jugador.dibujarVidas(g, xInicio, yInicio);
+    g.setColor(Color.WHITE);
+    g.setFont(new Font("Arial", Font.BOLD, 20));
+    g.drawString("Puntuación: " + puntuacion, 10, 30); 
         g.dispose();
         buffer.show();
     }
