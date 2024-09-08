@@ -1,6 +1,7 @@
 package Logica;
 
 import Jugador.Jugador;
+import Menu.Menu;
 import Disparo.Disparo;
 import Aliens.Aliens;
 import Bloques.Bloques;
@@ -12,6 +13,9 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import java.awt.image.BufferStrategy;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import javax.sound.sampled.Clip;
 
 public class Logica extends Canvas {
 
@@ -27,6 +31,7 @@ public class Logica extends Canvas {
     private boolean juegoEnPausa = false;
     private Timer timer;
     private int puntuacion;
+    private Clip clipMusica;
 
     public Logica() {
         jugador = new Jugador(400, 550);
@@ -154,6 +159,15 @@ public class Logica extends Canvas {
             numDisparos++;
         }
     }
+    public void setClipMusica(Clip clip) {
+        this.clipMusica = clip;
+    }
+    private void cerrarJuego() {
+    if (clipMusica != null && clipMusica.isRunning()) {
+        clipMusica.stop();
+        clipMusica.close();
+    }
+}
 
     public void pausarJuego() {
         juegoEnPausa = !juegoEnPausa;
@@ -168,7 +182,10 @@ public class Logica extends Canvas {
                 juegoEnPausa = false;
                 timer.start();
             } else if (opcion == 2) { 
-                System.exit(0);
+                cerrarJuego();
+                JFrame ventana = (JFrame) SwingUtilities.getWindowAncestor(this);
+                ventana.dispose(); 
+                new Menu();        
             }
         }
     }
