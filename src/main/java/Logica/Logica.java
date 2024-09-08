@@ -250,40 +250,47 @@ public class Logica extends Canvas {
         numDisparos--;
     }
 
+  
     public void renderizar() {
-        BufferStrategy buffer = getBufferStrategy();
-        if (buffer == null) {
-            createBufferStrategy(3); 
-            return;
-        }
-
-        Graphics g = buffer.getDrawGraphics();
-
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, getWidth(), getHeight());
-
-        jugador.dibujar(g);
-        for (Aliens enemigo : enemigos) {
-            if (enemigo != null && enemigo.estaActivo()) {
-                enemigo.dibujar(g);
-            }
-        }
-        for (int i = 0; i < numDisparos; i++) {
-            if (disparos[i] != null) {
-                disparos[i].dibujar(g);
-            }
-        }
-        for (Bloques bloque : bloques) {
-            if (bloque != null && bloque.estaActivo()) {
-                bloque.dibujar(g);
-            }
-        }
-
-        g.setColor(Color.WHITE);
-        g.drawString("Puntuación: " + puntuacion, 10, 20);
-        g.drawString("Vidas: " + jugador.getVidas(), getWidth() - 100, 20);
-
-        g.dispose();
-        buffer.show();
+    BufferStrategy buffer = getBufferStrategy();
+    if (buffer == null) {
+        createBufferStrategy(3); 
+        return;
     }
+
+    Graphics g = buffer.getDrawGraphics();
+
+    g.setColor(Color.BLACK);
+    g.fillRect(0, 0, getWidth(), getHeight());
+
+    jugador.dibujar(g);
+    for (Aliens enemigo : enemigos) {
+        if (enemigo != null && enemigo.estaActivo()) {
+            enemigo.dibujar(g);
+        }
+    }
+    for (int i = 0; i < numDisparos; i++) {
+        if (disparos[i] != null) {
+            disparos[i].dibujar(g);
+        }
+    }
+    for (Bloques bloque : bloques) {
+        if (bloque != null && bloque.estaActivo()) {
+            bloque.dibujar(g);
+        }
+    }
+
+    // Mostrar puntuación
+    g.setColor(Color.WHITE);
+    g.drawString("Puntuación: " + puntuacion, 10, 20);
+
+    // Mostrar vidas usando el método dibujarVidas
+    int xInicio = 10; // Posición horizontal de inicio para las vidas
+    int yInicio = 560; // Posición vertical para las vidas
+    jugador.dibujarVidas(g, xInicio, yInicio);
+
+    g.dispose();
+    buffer.show();
+    }
+
 }
