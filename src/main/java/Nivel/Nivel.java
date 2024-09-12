@@ -3,10 +3,24 @@ package Nivel;
 import Aliens.Aliens;
 import Bloques.Bloques;
 
+/**
+ * La clase {@code Nivel} representa los niveles en el juego. Se encarga de inicializar y proporcionar información sobre
+ * los enemigos y bloques presentes en el nivel.
+ * <p>
+ * Dependiendo del número de nivel pasado al constructor, se crean diferentes configuraciones de enemigos y bloques.
+ */
 public class Nivel {
     private Aliens[] enemigos;
     private Bloques[] bloques;
 
+    /**
+     * Crea una nueva instancia de {@code Nivel} según el número del nivel proporcionado.
+     * <p>
+     * Dependiendo del número del nivel, se inicializan diferentes configuraciones de enemigos y bloques.
+     *
+     * @param nivel el número del nivel a crear (1, 2 o 3)
+     * @throws IllegalArgumentException si el nivel no está definido (número de nivel fuera del rango permitido)
+     */
     public Nivel(int nivel) {
         switch (nivel) {
             case 1:
@@ -38,8 +52,6 @@ public class Nivel {
                     new Aliens(220, 150, 2),
                     new Aliens(280, 150, 2),
                     new Aliens(340, 150, 2),
-                    //
-  
                 };
                 bloques = new Bloques[] {
                     new Bloques(230, 500),
@@ -82,14 +94,29 @@ public class Nivel {
         }
     }
 
+    /**
+     * Obtiene el array de enemigos para el nivel actual.
+     *
+     * @return un array de objetos {@code Aliens} que representan los enemigos en el nivel
+     */
     public Aliens[] getEnemigos() {
         return enemigos;
     }
 
+    /**
+     * Obtiene el array de bloques para el nivel actual.
+     *
+     * @return un array de objetos {@code Bloques} que representan los bloques en el nivel
+     */
     public Bloques[] getBloques() {
         return bloques;
     }
 
+    /**
+     * Obtiene el número total de enemigos en el nivel actual.
+     *
+     * @return el número de enemigos en el nivel
+     */
     public int getNumEnemigos() {
         return enemigos.length;
     }

@@ -7,12 +7,20 @@ import java.awt.event.ActionListener;
 import Logica.Logica;
 import javax.sound.sampled.*;
 import java.io.File;
-import java.io.IOException; 
-import javax.sound.sampled.Clip;
+import java.io.IOException;
 
+/**
+ * La clase {@code Menu} representa el menú principal del juego. 
+ * Permite al usuario iniciar una nueva partida, cargar un juego guardado, ver instrucciones y créditos.
+ * <p>
+ * Esta clase extiende {@code JFrame} y configura una ventana con botones para las diferentes opciones del menú.
+ */
 public class Menu extends JFrame {
-private Clip clipMusica;
+    private Clip clipMusica;
 
+    /**
+     * Crea una nueva instancia de {@code Menu} y configura la interfaz de usuario.
+     */
     public Menu() {
         setTitle("Menú Principal");
         setSize(800, 600);
@@ -67,6 +75,11 @@ private Clip clipMusica;
         setVisible(true);
     }
 
+    /**
+     * Muestra un formulario para que el jugador ingrese su nombre y comience una nueva partida.
+     * <p>
+     * La ventana de formulario permite ingresar el nombre del jugador y contiene un botón para iniciar el juego.
+     */
     private void mostrarFormularioNuevaPartida() {
         JPanel panelFormulario = new JPanel();
         panelFormulario.setLayout(new GridBagLayout());
@@ -110,6 +123,14 @@ private Clip clipMusica;
         });
     }
 
+    /**
+     * Reproduce una pista de música en bucle.
+     * <p>
+     * Abre el archivo de audio especificado y reproduce el clip en bucle continuo.
+     *
+     * @param rutaArchivo la ruta del archivo de música a reproducir
+     * @return el clip de música reproducido
+     */
     public static Clip reproducirMusica(String rutaArchivo) {
         Clip clip = null;
         try {
@@ -125,14 +146,18 @@ private Clip clipMusica;
         return clip;
     }
 
-
-
+    /**
+     * Inicia el juego con el nombre del jugador especificado.
+     * <p>
+     * Crea una nueva ventana del juego y la inicializa con la lógica del juego. También configura la reproducción de música.
+     *
+     * @param nombreJugador el nombre del jugador que iniciará el juego
+     */
     private void iniciarJuego(String nombreJugador) {
         JFrame ventana = new JFrame("Space Invaders");
         Logica logica = new Logica();
         Clip clipMusica = reproducirMusica("src/main/java/sounds/soundtrack.wav");
         logica.setClipMusica(clipMusica);
-
 
         JButton botonPausa = new JButton("Pausa");
         botonPausa.setSize(100, 30);
@@ -154,27 +179,47 @@ private Clip clipMusica;
         this.dispose();
     }
 
+    /**
+     * Muestra un mensaje informativo sobre la funcionalidad de cargar un juego.
+     * <p>
+     * Actualmente, la funcionalidad de carga de juego no está implementada.
+     */
     private void mostrarCargarJuego() {
         JOptionPane.showMessageDialog(this, "Funcionalidad de Cargar Juego aún no implementada.");
     }
 
-private void mostrarInstrucciones() {
-    String instrucciones = "Instrucciones de Space Invaders:\n\n"
-                         + "- Usa las flechas izquierda y derecha para mover tu nave.\n"
-                         + "- Presiona la barra espaciadora para disparar a los enemigos.\n"
-                         + "- Presiona 'P' para pausar el juego.\n"
-                         + "- Tu objetivo es derrotar a todos los enemigos antes de que toquen tus defensas.\n"
-                         + "- ¡Buena suerte!";
-                         
-    JOptionPane.showMessageDialog(this, instrucciones, "Instrucciones", JOptionPane.INFORMATION_MESSAGE);
-}
-
-
-    private void mostrarCreditos() {
-        JOptionPane.showMessageDialog(this, "Créditos: Desarrolladores del juego.");
+    /**
+     * Muestra un mensaje con las instrucciones del juego.
+     * <p>
+     * Proporciona detalles sobre los controles y el objetivo del juego.
+     */
+    private void mostrarInstrucciones() {
+        String instrucciones = "Instrucciones de Space Invaders:\n\n"
+                             + "- Usa las flechas izquierda y derecha para mover tu nave.\n"
+                             + "- Presiona la barra espaciadora para disparar a los enemigos.\n"
+                             + "- Presiona 'P' para pausar el juego.\n"
+                             + "- Tu objetivo es derrotar a todos los enemigos antes de que toquen tus defensas.\n"
+                             + "- ¡Buena suerte!";
+                             
+        JOptionPane.showMessageDialog(this, instrucciones, "Instrucciones", JOptionPane.INFORMATION_MESSAGE);
     }
 
+    /**
+     * Muestra un mensaje con los créditos del juego.
+     * <p>
+     * Proporciona el nombre del creador del juego o información relevante de créditos.
+     */
+    private void mostrarCreditos() {
+        JOptionPane.showMessageDialog(this, "Créditos: Toshihiro Nishikado");
+    }
 
+    /**
+     * Método principal que inicia la aplicación del menú.
+     * <p>
+     * Llama al constructor de la clase {@code Menu} en el hilo de eventos de Swing.
+     *
+     * @param args argumentos de la línea de comandos
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
