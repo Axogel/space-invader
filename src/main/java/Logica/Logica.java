@@ -380,56 +380,14 @@ public class Logica extends Canvas {
         numDisparos--;
     }
 
-<<<<<<< HEAD
     /**
-     * Renderiza todos los elementos del juego en el {@code Canvas}.
+     * Renderiza tanto el fondo como los disparos, vidas y al jugador
      */
-    public void renderizar() {
-        BufferStrategy buffer = getBufferStrategy();
-        if (buffer == null) {
-            createBufferStrategy(3); 
-            return;
-        }
-
-        Graphics g = buffer.getDrawGraphics();
-
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, getWidth(), getHeight());
-
-        jugador.dibujar(g);
-        for (Aliens enemigo : enemigos) {
-            if (enemigo != null && enemigo.estaActivo()) {
-                enemigo.dibujar(g);
-            }
-        }
-        for (int i = 0; i < numDisparos; i++) {
-            if (disparos[i] != null) {
-                disparos[i].dibujar(g);
-            }
-        }
-        for (Bloques bloque : bloques) {
-            if (bloque != null && bloque.estaActivo()) {
-                bloque.dibujar(g);
-            }
-        }
-        dibujarNaves(g); 
-
-        int xInicio = 10; 
-        int yInicio = 520;
-        jugador.dibujarVidas(g, xInicio, yInicio);
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 20));
-        g.drawString("Puntuación: " + puntuacion, 10, 30); 
-        g.dispose();
-        buffer.show();
-=======
-  
-    public void renderizar() {
+    public void renderizar(){
     BufferStrategy buffer = getBufferStrategy();
     if (buffer == null) {
         createBufferStrategy(3); 
         return;
->>>>>>> 098f309509543aca69f6bcae95b915c81a2a67db
     }
 
     Graphics g = buffer.getDrawGraphics();
@@ -466,5 +424,4 @@ public class Logica extends Canvas {
     g.dispose();
     buffer.show();
     }
-
 }
