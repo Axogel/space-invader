@@ -19,6 +19,13 @@ import javax.sound.sampled.Clip;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+/**
+ * La clase {@code Logica} gestiona la lógica principal del juego, incluyendo el control del jugador, la actualización de los enemigos, 
+ * la detección de colisiones, la gestión de disparos y la renderización de la interfaz gráfica.
+ * <p>
+ * Esta clase extiende {@code Canvas} y contiene el bucle principal del juego, maneja las entradas del teclado, y actualiza 
+ * y dibuja los elementos del juego en pantalla.
+ */
 public class Logica extends Canvas {
 
     private final Jugador jugador;
@@ -38,8 +45,12 @@ public class Logica extends Canvas {
     private Timer naveTimer;
     private int numNaves = 0;
     private Nave[] naves;
-private Clip clipMusica;
+    private Clip clipMusica;
 
+    /**
+     * Crea una nueva instancia de {@code Logica}. Inicializa el jugador, los disparos, enemigos, bloques, y naves,
+     * y configura los temporizadores para la actualización del juego y la generación de naves.
+     */
     public Logica() {
         jugador = new Jugador(400, 550);
         disparos = new Disparo[10];
@@ -90,19 +101,31 @@ private Clip clipMusica;
         timer.start();
         naveTimer = new Timer(10000, e -> generarNave());
         naveTimer.start();
-
     }
-        public void setClipMusica(Clip clip) {
+
+    /**
+     * Establece el clip de música que se reproducirá durante el juego.
+     *
+     * @param clip el clip de música a establecer
+     */
+    public void setClipMusica(Clip clip) {
         this.clipMusica = clip;
     }
 
+    /**
+     * Cierra el juego y detiene la reproducción de música si está en curso.
+     */
     private void cerrarJuego() {
         if (clipMusica != null && clipMusica.isRunning()) {
             clipMusica.stop();
             clipMusica.close();
         }
     }
-private void generarNave() {
+
+    /**
+     * Genera una nueva nave y la agrega al array de naves si hay espacio disponible.
+     */
+    private void generarNave() {
         if (numNaves < naves.length) {
             Nave nuevaNave = new Nave((int) (Math.random() * (getWidth() - 40)), 50);
             naves[numNaves] = nuevaNave;
@@ -110,6 +133,9 @@ private void generarNave() {
         }
     }
 
+    /**
+     * Mueve todas las naves activas.
+     */
     private void moverNaves() {
         for (int i = 0; i < numNaves; i++) {
             Nave nave = naves[i];
@@ -119,6 +145,11 @@ private void generarNave() {
         }
     }
 
+    /**
+     * Dibuja todas las naves activas en el gráfico especificado.
+     *
+     * @param g el objeto {@code Graphics} en el que se dibujan las naves
+     */
     private void dibujarNaves(Graphics g) {
         for (Nave nave : naves) {
             if (nave != null && nave.estaActivo()) {
@@ -126,6 +157,12 @@ private void generarNave() {
             }
         }
     }
+
+    /**
+     * Carga el nivel especificado y establece los enemigos y bloques correspondientes.
+     *
+     * @param nivel el número del nivel a cargar
+     */
     private void cargarNivel(int nivel) {
         nivelActual = new Nivel(nivel);
         enemigos = nivelActual.getEnemigos();
@@ -134,6 +171,9 @@ private void generarNave() {
         numBloques = bloques.length;
     }
 
+    /**
+     * Verifica si el nivel actual ha sido completado y avanza al siguiente nivel o finaliza el juego.
+     */
     private void verificarNivel() {
         if (numEnemigos <= 0) {
             nivel++;
@@ -146,6 +186,11 @@ private void generarNave() {
         }
     }
 
+    /**
+     * Elimina un enemigo del array de enemigos en la posición especificada.
+     *
+     * @param index el índice del enemigo a eliminar
+     */
     private void eliminarEnemigo(int index) {
         for (int i = index; i < numEnemigos - 1; i++) {
             enemigos[i] = enemigos[i + 1];
@@ -154,6 +199,10 @@ private void generarNave() {
         numEnemigos--;
     }
 
+    /**
+     * Verifica las colisiones entre el jugador y los enemigos. Si hay una colisión, el jugador pierde una vida
+     * y el enemigo se desactiva.
+     */
     private void verificarColisionesConEnemigos() {
         for (Aliens enemigo : enemigos) {
             if (enemigo != null && enemigo.estaActivo()) {
@@ -170,53 +219,58 @@ private void generarNave() {
         }
     }
 
-private void detectarColisiones() {
-    for (int i = 0; i < numDisparos; i++) {
-        Disparo disparo = disparos[i];
-        Rectangle boundsDisparo = disparo.getBounds();
+    /**
+     * Detecta y maneja las colisiones entre disparos y otros objetos (enemigos, bloques, naves).
+     */
+    private void detectarColisiones() {
+        for (int i = 0; i < numDisparos; i++) {
+            Disparo disparo = disparos[i];
+            Rectangle boundsDisparo = disparo.getBounds();
 
-        for (int j = 0; j < numEnemigos; j++) {
-            Aliens enemigo = enemigos[j];
-            if (enemigo != null && enemigo.estaActivo()) {
-                Rectangle boundsEnemigo = enemigo.getBounds();
-                if (boundsDisparo.intersects(boundsEnemigo)) {
-                    enemigo.setActivo(false);
+            for (int j = 0; j < numEnemigos; j++) {
+                Aliens enemigo = enemigos[j];
+                if (enemigo != null && enemigo.estaActivo()) {
+                    Rectangle boundsEnemigo = enemigo.getBounds();
+                    if (boundsDisparo.intersects(boundsEnemigo)) {
+                        enemigo.setActivo(false);
+                        disparo.setActivo(false);
+                        puntuacion += enemigo.puntos; 
+                        eliminarEnemigo(j);
+                        break;
+                    }
+                }
+            }
+
+            for (int k = 0; k < numBloques; k++) {
+                Bloques bloque = bloques[k];
+                if (bloque != null && bloque.estaActivo() && boundsDisparo.intersects(bloque.getBounds())) {
+                    bloque.destruir(); 
                     disparo.setActivo(false);
-                    puntuacion += enemigo.puntos; 
-                    eliminarEnemigo(j);
                     break;
+                }
+            }
+
+            for (int l = 0; l < numNaves; l++) {
+                Nave nave = naves[l];
+                if (nave != null && nave.estaActivo()) {
+                    Rectangle boundsNave = nave.getBounds();
+                    if (boundsDisparo.intersects(boundsNave)) {
+                        nave.setActivo(false); 
+                        disparo.setActivo(false);
+                        puntuacion += nave.puntos; 
+                        break;
+                    }
                 }
             }
         }
 
-        for (int k = 0; k < numBloques; k++) {
-            Bloques bloque = bloques[k];
-            if (bloque != null && bloque.estaActivo() && boundsDisparo.intersects(bloque.getBounds())) {
-                bloque.destruir(); 
-                disparo.setActivo(false);
-                break;
-            }
-        }
-
-        for (int l = 0; l < numNaves; l++) {
-            Nave nave = naves[l];
-            if (nave != null && nave.estaActivo()) {
-                Rectangle boundsNave = nave.getBounds();
-                if (boundsDisparo.intersects(boundsNave)) {
-                    nave.setActivo(false); 
-                    disparo.setActivo(false);
-                    puntuacion += nave.puntos; 
-                    break;
-                }
-            }
-        }
+        verificarColisionesConEnemigos();
+        verificarNivel();
     }
 
-    verificarColisionesConEnemigos();
-
-    verificarNivel();
-}
-
+    /**
+     * Crea un nuevo disparo y lo añade al array de disparos si hay espacio disponible.
+     */
     private void disparar() {
         if (numDisparos < disparos.length) {
             Disparo nuevoDisparo = new Disparo(jugador.getX() + jugador.getAncho() / 2 - Disparo.ANCHO / 2, jugador.getY() - Disparo.ALTO);
@@ -225,6 +279,9 @@ private void detectarColisiones() {
         }
     }
 
+    /**
+     * Pausa o reanuda el juego, y muestra el menú de pausa donde se puede guardar la partida, reanudar el juego o salir.
+     */
     public void pausarJuego() {
         juegoEnPausa = !juegoEnPausa;
         if (juegoEnPausa) {
@@ -238,21 +295,28 @@ private void detectarColisiones() {
                 juegoEnPausa = false;
                 timer.start();
             } else if (opcion == 2) { 
-                                cerrarJuego();
+                cerrarJuego();
                 JFrame ventana = (JFrame) SwingUtilities.getWindowAncestor(this);
                 ventana.dispose();
                 new Menu(); 
-
             }
         }
     }
 
+    /**
+     * Muestra un menú de pausa con opciones para reanudar, guardar la partida o salir.
+     *
+     * @return el índice de la opción seleccionada en el menú de pausa
+     */
     private int mostrarMenuPausa() {
         String[] opciones = {"Reanudar", "Guardar Partida", "Salir"};
         return JOptionPane.showOptionDialog(this, "Juego en Pausa", "Menu de Pausa",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, opciones, opciones[0]);
     }
 
+    /**
+     * Guarda el estado actual del juego en un archivo de texto.
+     */
     private void guardarPartida() {
         try (FileWriter writer = new FileWriter("partida_guardada.txt")) {
             writer.write("Jugador X: " + jugador.getX() + "\n");
@@ -270,6 +334,9 @@ private void detectarColisiones() {
         }
     }
 
+    /**
+     * Actualiza el estado del juego, mueve los enemigos, los disparos y detecta colisiones.
+     */
     private void actualizar() {
         if (!juegoEnPausa) {
             if (izquierdaPresionada && jugador.getX() > 0) {
@@ -300,6 +367,11 @@ private void detectarColisiones() {
         }
     }
 
+    /**
+     * Elimina un disparo del array de disparos en la posición especificada.
+     *
+     * @param index el índice del disparo a eliminar
+     */
     private void eliminarDisparo(int index) {
         for (int i = index; i < numDisparos - 1; i++) {
             disparos[i] = disparos[i + 1];
@@ -308,6 +380,10 @@ private void detectarColisiones() {
         numDisparos--;
     }
 
+<<<<<<< HEAD
+    /**
+     * Renderiza todos los elementos del juego en el {@code Canvas}.
+     */
     public void renderizar() {
         BufferStrategy buffer = getBufferStrategy();
         if (buffer == null) {
@@ -338,13 +414,57 @@ private void detectarColisiones() {
         }
         dibujarNaves(g); 
 
-    int xInicio = 10; 
-    int yInicio = 520;
-    jugador.dibujarVidas(g, xInicio, yInicio);
-    g.setColor(Color.WHITE);
-    g.setFont(new Font("Arial", Font.BOLD, 20));
-    g.drawString("Puntuación: " + puntuacion, 10, 30); 
+        int xInicio = 10; 
+        int yInicio = 520;
+        jugador.dibujarVidas(g, xInicio, yInicio);
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.drawString("Puntuación: " + puntuacion, 10, 30); 
         g.dispose();
         buffer.show();
+=======
+  
+    public void renderizar() {
+    BufferStrategy buffer = getBufferStrategy();
+    if (buffer == null) {
+        createBufferStrategy(3); 
+        return;
+>>>>>>> 098f309509543aca69f6bcae95b915c81a2a67db
     }
+
+    Graphics g = buffer.getDrawGraphics();
+
+    g.setColor(Color.BLACK);
+    g.fillRect(0, 0, getWidth(), getHeight());
+
+    jugador.dibujar(g);
+    for (Aliens enemigo : enemigos) {
+        if (enemigo != null && enemigo.estaActivo()) {
+            enemigo.dibujar(g);
+        }
+    }
+    for (int i = 0; i < numDisparos; i++) {
+        if (disparos[i] != null) {
+            disparos[i].dibujar(g);
+        }
+    }
+    for (Bloques bloque : bloques) {
+        if (bloque != null && bloque.estaActivo()) {
+            bloque.dibujar(g);
+        }
+    }
+
+    // Mostrar puntuación
+    g.setColor(Color.WHITE);
+    g.drawString("Puntuación: " + puntuacion, 10, 20);
+
+    // Mostrar vidas usando el método dibujarVidas
+    int xInicio = 10; // Posición horizontal de inicio para las vidas
+    int yInicio = 560; // Posición vertical para las vidas
+    jugador.dibujarVidas(g, xInicio, yInicio);
+
+    g.dispose();
+    buffer.show();
+    }
+
 }
