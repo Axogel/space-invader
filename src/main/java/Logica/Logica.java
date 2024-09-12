@@ -18,7 +18,7 @@ import Menu.Menu;
 import javax.sound.sampled.Clip;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-
+import java.util.Random;
 /**
  * La clase {@code Logica} gestiona la lógica principal del juego, incluyendo el control del jugador, la actualización de los enemigos, 
  * la detección de colisiones, la gestión de disparos y la renderización de la interfaz gráfica.
@@ -46,7 +46,9 @@ public class Logica extends Canvas {
     private int numNaves = 0;
     private Nave[] naves;
     private Clip clipMusica;
-
+    private Timer disparoEnemigosTimer;
+    private final Disparo[] disparosEnemigos = new Disparo[1000];
+    private int numDisparosEnemigos = 0;
     /**
      * Crea una nueva instancia de {@code Logica}. Inicializa el jugador, los disparos, enemigos, bloques, y naves,
      * y configura los temporizadores para la actualización del juego y la generación de naves.
@@ -101,6 +103,8 @@ public class Logica extends Canvas {
         timer.start();
         naveTimer = new Timer(10000, e -> generarNave());
         naveTimer.start();
+        disparoEnemigosTimer = new Timer(1000, e -> dispararEnemigos());
+        disparoEnemigosTimer.start();
     }
 
     /**
@@ -120,6 +124,12 @@ public class Logica extends Canvas {
             clipMusica.stop();
             clipMusica.close();
         }
+        timer.stop();
+        naveTimer.stop();
+        disparoEnemigosTimer.stop();
+        JFrame ventana = (JFrame) SwingUtilities.getWindowAncestor(this);
+        ventana.dispose();
+        new Menu(); 
     }
 
     /**
@@ -200,6 +210,104 @@ public class Logica extends Canvas {
     }
 
     /**
+     * Realiza los disparos de los enemigos si el juego no está en pausa.
+     * Recorre la lista de enemigos y genera un nuevo disparo para aquellos que están activos.
+     * Solo se permiten disparos si no se ha alcanzado el límite máximo de disparos.
+     */
+    private void dispararEnemigos() {
+        if (!juegoEnPausa) {
+            for (Aliens enemigo : enemigos) {
+                if (enemigo != null && enemigo.estaActivo()) {
+                    Random random = new Random();
+                    int numeroAleatorio = random.nextInt(100); ///voy a hacer un numero random porque es muy dificil si todos disparan al mismo tiempo 
+                    if (numDisparosEnemigos < disparosEnemigos.length && numeroAleatorio > 90) {
+                        Disparo disparoEnemigo = new Disparo((int)Math.round(enemigo.getX() * 0.9 ) - Disparo.ANCHO / 2, enemigo.getY());
+                        disparoEnemigo.setDirection(1); // Disparo hacia abajo
+                        disparosEnemigos[numDisparosEnemigos] = disparoEnemigo;
+                        numDisparosEnemigos++;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Mueve los disparos de los enemigos. Recorre todos los disparos activos y los mueve.
+     * Si un disparo deja de estar activo, se elimina de la lista de disparos enemigos.
+     */
+    private void moverDisparosEnemigos() {
+        for (int i = 0; i < numDisparosEnemigos; i++) {
+            Disparo disparo = disparosEnemigos[i];
+            if (disparo != null) {
+                disparo.mover();
+                if (!disparo.estaActivo()) {
+                    eliminarDisparoEnemigo(i);
+                }
+            }
+        }
+    }
+
+    /**
+     * Detecta colisiones entre los disparos enemigos y el jugador o los bloques.
+     * Si un disparo colisiona con el jugador, este pierde una vida y el disparo se elimina.
+     * Si un disparo colisiona con un bloque, este puede destruirse o dañarse y el disparo se elimina.
+     */
+    private void detectarColisionesConDisparosEnemigos() {
+        for (int i = 0; i < numDisparosEnemigos; i++) {
+            Disparo disparo = disparosEnemigos[i];
+            Rectangle boundsDisparo = disparo.getBounds();
+
+            Rectangle boundsJugador = new Rectangle(jugador.getX(), jugador.getY(), jugador.getAncho(), 20);
+            if (boundsDisparo.intersects(boundsJugador)) {
+                jugador.perderVida();
+                disparo.setActivo(false);
+                eliminarDisparoEnemigo(i);
+                continue;
+            }
+
+            for (int j = 0; j < numBloques; j++) {
+                Bloques bloque = bloques[j];
+                if (bloque != null && bloque.estaActivo() && boundsDisparo.intersects(bloque.getBounds())) {
+                    bloque.destruir(); // O daño parcial si quieres que se destruya gradualmente
+                    disparo.setActivo(false);
+                    eliminarDisparoEnemigo(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Elimina un disparo enemigo del arreglo de disparos en el índice especificado.
+     * Los disparos posteriores se desplazan una posición hacia la izquierda.
+     *
+     * @param index El índice del disparo enemigo a eliminar.
+     */
+    private void eliminarDisparoEnemigo(int index) {
+        for (int i = index; i < numDisparosEnemigos - 1; i++) {
+            disparosEnemigos[i] = disparosEnemigos[i + 1];
+        }
+        disparosEnemigos[numDisparosEnemigos - 1] = null;
+        numDisparosEnemigos--;
+    }
+
+    /**
+     * Dibuja los disparos enemigos en la pantalla.
+     * Recorre todos los disparos activos y llama al método de dibujo de cada disparo.
+     *
+     * @param g El contexto gráfico utilizado para dibujar los disparos.
+     */
+    private void dibujarDisparosEnemigos(Graphics g) {
+        for (int i = 0; i < numDisparosEnemigos; i++) {
+            if (disparosEnemigos[i] != null && disparosEnemigos[i].estaActivo()) {
+                disparosEnemigos[i].dibujar(g);
+            }
+        }
+    }
+
+
+
+    /**
      * Verifica las colisiones entre el jugador y los enemigos. Si hay una colisión, el jugador pierde una vida
      * y el enemigo se desactiva.
      */
@@ -278,6 +386,18 @@ public class Logica extends Canvas {
             numDisparos++;
         }
     }
+      /**
+     * Reanuda el juego con la logica de los timers y el Focus al juego para las telas
+     */
+    private void reanudarJuego() {
+        juegoEnPausa = false;
+        timer.start();
+        naveTimer.start();
+        disparoEnemigosTimer.start();
+        
+        // Asegurar que el Canvas tenga el foco
+        requestFocusInWindow();
+    }
 
     /**
      * Pausa o reanuda el juego, y muestra el menú de pausa donde se puede guardar la partida, reanudar el juego o salir.
@@ -286,20 +406,19 @@ public class Logica extends Canvas {
         juegoEnPausa = !juegoEnPausa;
         if (juegoEnPausa) {
             timer.stop();
+            naveTimer.stop();
+            disparoEnemigosTimer.stop();
             int opcion = mostrarMenuPausa();
             if (opcion == 0) { 
-                juegoEnPausa = false;
-                timer.start();
+                reanudarJuego();
             } else if (opcion == 1) {
                 guardarPartida();
-                juegoEnPausa = false;
-                timer.start();
+                    reanudarJuego();
+
             } else if (opcion == 2) { 
                 cerrarJuego();
-                JFrame ventana = (JFrame) SwingUtilities.getWindowAncestor(this);
-                ventana.dispose();
-                new Menu(); 
             }
+
         }
     }
 
@@ -345,8 +464,13 @@ public class Logica extends Canvas {
             if (derechaPresionada && jugador.getX() < getWidth() - jugador.getAncho()) {
                 jugador.moverDerecha();
             }
-
-            for (Aliens enemigo : enemigos) {
+            moverDisparosEnemigos(); 
+            detectarColisionesConDisparosEnemigos();  
+            if (jugador.getVidas() <= 0){
+                        JOptionPane.showMessageDialog(this, "¡Se te han acabado las vidas! Juego Terminado.");        
+                        cerrarJuego();
+            } 
+                for (Aliens enemigo : enemigos) {
                 if (enemigo != null) {
                     enemigo.mover();
                 }
@@ -396,6 +520,7 @@ public class Logica extends Canvas {
     g.fillRect(0, 0, getWidth(), getHeight());
 
     jugador.dibujar(g);
+    dibujarDisparosEnemigos(g);
     for (Aliens enemigo : enemigos) {
         if (enemigo != null && enemigo.estaActivo()) {
             enemigo.dibujar(g);
@@ -418,7 +543,7 @@ public class Logica extends Canvas {
 
     // Mostrar vidas usando el método dibujarVidas
     int xInicio = 10; // Posición horizontal de inicio para las vidas
-    int yInicio = 560; // Posición vertical para las vidas
+    int yInicio = 500; // Posición vertical para las vidas
     jugador.dibujarVidas(g, xInicio, yInicio);
 
     g.dispose();

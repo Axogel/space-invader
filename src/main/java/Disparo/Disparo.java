@@ -30,6 +30,8 @@ public class Disparo {
 
     /** La imagen que representa el disparo. */
     private final Image imagen;
+      /** Dirección del disparo: -1 para arriba, 1 para abajo */
+    private int direccion = -1;
 
     /**
      * Crea un nuevo {@code Disparo} en la posición especificada.
@@ -60,14 +62,21 @@ public class Disparo {
             g.drawImage(imagen, x, y, ANCHO, ALTO, null);
         }
     }
-
     /**
-     * Mueve el disparo hacia arriba en la pantalla.
+     * Establece la dirección del disparo.
+     * 
+     * @param direccion -1 para disparo hacia arriba, 1 para disparo hacia abajo.
+     */
+    public void setDirection(int direccion) {
+        this.direccion = direccion;
+    }
+    /**
+     * Mueve el disparo hacia la direccion en la pantalla.
      * <p>
      * Este método actualiza la posición vertical del disparo y desactiva el disparo si se sale de la pantalla.
      */
     public void mover() {
-        y -= 5;
+        y += 5 * direccion;
         if (y < 0) {
             activo = false;
         }
