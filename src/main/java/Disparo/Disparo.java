@@ -1,10 +1,10 @@
 package Disparo;
 
+import Recursos.Recursos;
 import javax.sound.sampled.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import javax.swing.ImageIcon;
 
 /**
  * La clase {@code Disparo} representa un disparo en el juego.
@@ -46,7 +46,7 @@ public class Disparo {
         this.y = y;
         this.activo = true;
 
-        this.imagen = new ImageIcon("src/main/java/Imagenes/bullet.png").getImage();
+        this.imagen = Recursos.cargarImagen("bullet.png");
         reproducirSonido("src/main/java/sounds/shot.wav");
     }
 

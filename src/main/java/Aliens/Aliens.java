@@ -35,24 +35,24 @@ public class Aliens {
 
         switch (tipo) {
             case 1:
-                this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/calamar.png");
+                this.imagen = Recursos.cargarImagen("calamar.png");
                 this.puntos = 30;  // Puntos para el alien tipo 1
                 break;
             case 2:
-                this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/cangrejo.png");
+                this.imagen = Recursos.cargarImagen("cangrejo.png");
                 this.puntos = 20;  // Puntos para el alien tipo 2
                 break;
             case 3:
-                this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/pulpo.png");
+                this.imagen = Recursos.cargarImagen("pulpo.png");
                 this.puntos = 10;  // Puntos para el alien tipo 3
                 break;
             case 4: 
                 // Nave 
-                this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/pulpo.png");
+                this.imagen = Recursos.cargarImagen("pulpo.png");
                 this.puntos = (int)(Math.random());  // Puntos para el alien tipo 4
                 break;
             default:
-                this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/default.png");
+                this.imagen = Recursos.cargarImagen("src/main/resources/Imagenes/default.png");
                 this.puntos = 50;   // Puntos por defecto si no coincide ningún tipo
                 break;
         }
@@ -64,8 +64,8 @@ public class Aliens {
      */
     public void mover() {
         x += dx;
-        if (x > 800 - ancho || x < 0) {
-            dx = -dx;
+        if (x > 800 - ancho || x < 0) { //verifica si se llego al borde 
+            dx = -dx; //invertimos la posicion de movimiento del eje x 
             y += dy; // Baja cuando llega a los bordes
         }
     }
@@ -76,7 +76,7 @@ public class Aliens {
      * @param g el objeto {@code Graphics} en el que se dibuja el alienígena
      */
     public void dibujar(Graphics g) {
-        if (activo) {
+        if (activo) { //verifica si existe
             g.drawImage(imagen, x, y, ancho, alto, null);
         }
     }
