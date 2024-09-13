@@ -1,7 +1,9 @@
 Menu\Menu$5.class
 Jugador\Jugador.class
-Menu\Menu.class
 Nave\Nave.class
+Disparo\Disparo.class
+Menu\Menu$3.class
+Menu\Menu.class
 Menu\Menu$6.class
 Menu\Menu$4.class
 Aliens\Aliens.class
@@ -11,7 +13,5 @@ Logica\Logica.class
 Menu\Menu$2.class
 Bloques\Bloques.class
 Logica\Logica$1.class
-Disparo\Disparo.class
 com\mycompany\space_invader\Space_Invader.class
 Nivel\Nivel.class
-Menu\Menu$3.class

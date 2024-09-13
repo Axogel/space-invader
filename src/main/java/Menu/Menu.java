@@ -210,7 +210,7 @@ public class Menu extends JFrame {
      * Proporciona el nombre del creador del juego o información relevante de créditos.
      */
     private void mostrarCreditos() {
-        JOptionPane.showMessageDialog(this, "Créditos: Toshihiro Nishikado");
+        JOptionPane.showMessageDialog(this, "Créditos: Jean Carlos Contreras y Angel Molina Ortiz ");
     }
 
     /**

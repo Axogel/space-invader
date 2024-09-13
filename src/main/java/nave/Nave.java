@@ -40,7 +40,7 @@ public class Nave {
         this.y = inicioY;
         this.activo = true;
         this.random = new Random();
-        this.imagen = Recursos.cargarImagen("src/main/java/Imagenes/naveespacial.png");
+        this.imagen = Recursos.cargarImagen("naveespacial.png");
         this.puntos = 100 + random.nextInt(100); 
 
         this.dx = random.nextInt(3) + 1; // Velocidad horizontal aleatoria

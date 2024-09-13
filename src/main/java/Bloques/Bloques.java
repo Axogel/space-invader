@@ -1,9 +1,9 @@
 package Bloques;
 
+import Recursos.Recursos;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
-import javax.swing.ImageIcon;
 
 /**
  * La clase {@code Bloques} representa un bloque en el juego que puede tener varios estados visuales.
@@ -30,12 +30,12 @@ public class Bloques {
 
         // Cargar las imágenes para los estados del bloque usando ImageIcon
         imagenes = new Image[6];
-        imagenes[0] = new ImageIcon("src/main/java/Imagenes/bloque.png").getImage();
-        imagenes[1] = new ImageIcon("src/main/java/Imagenes/bloque_progresivo_0.png").getImage();
-        imagenes[2] = new ImageIcon("src/main/java/Imagenes/bloque_progresivo_1.png").getImage();
-        imagenes[3] = new ImageIcon("src/main/java/Imagenes/bloque_progresivo_2.png").getImage();
-        imagenes[4] = new ImageIcon("src/main/java/Imagenes/bloque_progresivo_3.png").getImage();
-        imagenes[5] = new ImageIcon("src/main/java/Imagenes/bloque_progresivo_4.png").getImage();
+        imagenes[0] = Recursos.cargarImagen("bloque.png");
+        imagenes[1] = Recursos.cargarImagen("bloque_progresivo_0.png");
+        imagenes[2] = Recursos.cargarImagen("bloque_progresivo_1.png");
+        imagenes[3] = Recursos.cargarImagen("bloque_progresivo_2.png");
+        imagenes[4] = Recursos.cargarImagen("bloque_progresivo_3.png");
+        imagenes[5] = Recursos.cargarImagen("bloque_progresivo_4.png");
     }
 
     /**

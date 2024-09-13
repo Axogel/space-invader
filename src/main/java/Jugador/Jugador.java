@@ -2,7 +2,7 @@ package Jugador;
 
 import java.awt.Graphics;
 import java.awt.Image;
-import javax.swing.ImageIcon;
+import Recursos.Recursos;
 
 public class Jugador {
     private int x;
@@ -18,8 +18,8 @@ public class Jugador {
     public Jugador(int inicioX, int inicioY) {
         this.x = inicioX;
         this.y = inicioY;
-        imagen = new ImageIcon("src/main/java/Imagenes/nave.png").getImage();
-        imagenVida = new ImageIcon("src/main/java/Imagenes/nave.png").getImage(); // Imagen para las vidas
+        imagen = Recursos.cargarImagen("nave.png");
+        imagenVida = Recursos.cargarImagen("nave.png"); // Imagen para las vidas
         this.anchoVida = 20; // Ajusta el ancho deseado de la imagen de vida
         this.altoVida = 20; // Ajusta el alto deseado de la imagen de vida
         this.vidas = 3;
